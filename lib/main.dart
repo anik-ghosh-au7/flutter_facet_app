@@ -42,6 +42,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void setValue(String key) {
+    if (this.value.contains(key)) {
+      setState(() {
+        value.remove(key);
+      });
+    } else {
+      setState(() {
+        value.add(key);
+      });
+    }
+  }
+
   void setInfo() {
     final jsonEncoder = JsonEncoder();
     setState(() {
@@ -84,6 +96,9 @@ class _MyAppState extends State<MyApp> {
       ),
       drawer: Filters(
         aggregationData: aggregationData.toList(),
+        loading: false,
+        value: this.value,
+        setValue: this.setValue,
       ),
     ));
   }

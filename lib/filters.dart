@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+
+typedef void MyCallback(String foo);
 
 class CustomAppBar extends PreferredSize {
   final Widget child;
@@ -35,7 +36,12 @@ class CustomAppBar extends PreferredSize {
 
 class Filters extends StatefulWidget {
   final List aggregationData;
-  Filters({Key key, this.aggregationData}) : super(key: key);
+  final List value;
+  final MyCallback setValue;
+  final bool loading;
+  Filters(
+      {Key key, this.aggregationData, this.value, this.setValue, this.loading})
+      : super(key: key);
   @override
   _MyFiltersState createState() {
     return _MyFiltersState();
@@ -44,17 +50,24 @@ class Filters extends StatefulWidget {
 
 class _MyFiltersState extends State<Filters> {
   var aggregationData = new Map();
+  var value;
+  var loading;
 
   @override
   void initState() {
     super.initState();
+    value = widget.value;
     widget.aggregationData.forEach((element) {
       var key = element["_key"];
       setState(() {
-        aggregationData[key] = false;
+        if (value.contains(key)) {
+          aggregationData[key] = true;
+        } else {
+          aggregationData[key] = false;
+        }
       });
     });
-    print(aggregationData);
+    loading = widget.loading;
   }
 
   @override
@@ -87,20 +100,24 @@ class _MyFiltersState extends State<Filters> {
                       ],
                     ),
                   ),
-                  body: ListView(
-                    children: aggregationData.keys.map((key) {
-                      return new CheckboxListTile(
-                        title: new Text(key),
-                        value: aggregationData[key],
-                        onChanged: (bool value) {
-                          print('value ==>> ${value}');
-                          setState(() {
-                            aggregationData[key] = value;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
+                  body: loading
+                      ? Center(child: CircularProgressIndicator())
+                      : ListView(
+                          children: aggregationData.keys.map((key) {
+                            return new CheckboxListTile(
+                              activeColor: Colors.black54,
+                              dense: true,
+                              title: new Text(key),
+                              value: aggregationData[key],
+                              onChanged: (bool value) {
+                                setState(() {
+                                  aggregationData[key] = value;
+                                });
+                                widget.setValue(key);
+                              },
+                            );
+                          }).toList(),
+                        ),
                 ),
               ),
             ),
